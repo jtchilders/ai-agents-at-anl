@@ -46,3 +46,33 @@ This script will remotely launch the proxy on homes.cels.anl.gov and then launch
 ```bash
 ./argonne-claude.sh
 ```
+
+
+## Run PBS MCP Server as well
+
+```bash
+
+git clone --recursivegit@github.com:jtchilders/pbs-mcp-demo.git
+
+```
+
+Need to add MCP to Claude config.
+
+Edit `~/.claude.json` and add the following:
+
+```json
+{
+   "mcpServers": {
+      "pbs": {
+         "command": "/path/to/pbs-mcp-demo/start_pbs_mcp.sh"
+      },
+      "env": {
+         "PBS_SYSTEM": "aurora"
+      }
+   }
+}
+```
+
+Then restart Claude Code.
+
+Now you can use the `pbs` MCP server in Claude Code to launch jobs, check status, etc.

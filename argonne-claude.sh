@@ -5,8 +5,11 @@ REMOTE_HOST="homes.cels.anl.gov"
 REMOTE_PROXY_DIR="~/lmtools-main"
 LOCAL_PORT=8082
 MAX_PORT_ATTEMPTS=5
-ARGO_USER=$USER
+ARGO_USER="jchilders"
 MODEL="claudeopus45"
+
+# SSH ControlMaster settings
+CONTROL_PATH="/tmp/ssh-control-argonne-%r@%h:%p"
 
 # Colors for output
 GREEN='\033[0;32m'
@@ -17,10 +20,18 @@ NC='\033[0m' # No Color
 # Cleanup function
 cleanup() {
     echo -e "\n${YELLOW}Cleaning up...${NC}"
+    
+    # Kill the proxy SSH connection
     if [ ! -z "${SSH_PID}" ]; then
         kill ${SSH_PID} 2>/dev/null
     fi
-    ssh ${REMOTE_HOST} "pkill -f apiproxy" 2>/dev/null || true
+    
+    # Kill any remaining apiproxy processes
+    ssh -o ControlPath="${CONTROL_PATH}" ${REMOTE_HOST} "pkill -f apiproxy" 2>/dev/null || true
+    
+    # Close the control master connection
+    ssh -O exit -o ControlPath="${CONTROL_PATH}" ${REMOTE_HOST} 2>/dev/null || true
+    
     sleep 1
     echo -e "${GREEN}Done!${NC}"
     exit 0
@@ -31,12 +42,23 @@ trap cleanup SIGINT SIGTERM EXIT
 
 echo -e "${GREEN}Starting Argonne Claude proxy setup...${NC}"
 
-# Check if SSH connection is possible
-echo -e "${YELLOW}Testing SSH connection to ${REMOTE_HOST}...${NC}"
-if ! ssh -o ConnectTimeout=5 -o BatchMode=yes ${REMOTE_HOST} exit 2>/dev/null; then
-    echo -e "${RED}Cannot connect to ${REMOTE_HOST}. Check your SSH access.${NC}"
+# Establish ControlMaster connection
+echo -e "${YELLOW}Establishing SSH connection to ${REMOTE_HOST}...${NC}"
+echo -e "${YELLOW}(You may need to complete MFA authentication)${NC}"
+
+# Start the control master in the background
+ssh -fN \
+    -o ControlMaster=yes \
+    -o ControlPath="${CONTROL_PATH}" \
+    -o ControlPersist=10m \
+    ${REMOTE_HOST}
+
+if [ $? -ne 0 ]; then
+    echo -e "${RED}Failed to establish SSH connection. Check your credentials and MFA.${NC}"
     exit 1
 fi
+
+echo -e "${GREEN}SSH connection established!${NC}"
 
 # Kill any existing SSH tunnels on this port
 echo -e "${YELLOW}Cleaning up any existing tunnels...${NC}"
@@ -44,7 +66,7 @@ pkill -f "ssh.*-L.*:localhost:.*${REMOTE_HOST}" 2>/dev/null || true
 
 # Kill any existing apiproxy processes on remote server
 echo -e "${YELLOW}Cleaning up any existing remote proxy processes...${NC}"
-ssh ${REMOTE_HOST} "pkill -f apiproxy" 2>/dev/null || true
+ssh -o ControlPath="${CONTROL_PATH}" ${REMOTE_HOST} "pkill -f apiproxy" 2>/dev/null || true
 sleep 2
 
 # Try to start proxy with incremental port numbers
@@ -60,10 +82,12 @@ while [ ${ATTEMPT} -lt ${MAX_PORT_ATTEMPTS} ] && [ "${SUCCESS}" = "false" ]; do
     # Create log file with timestamp and port
     LOG_FILE="/tmp/argonne-proxy-${CURRENT_PORT}-$(date +%Y%m%d-%H%M%S).log"
     
-    # Start SSH tunnel with remote proxy in background
+    # Start SSH tunnel with remote proxy in background (using ControlMaster)
     echo -e "${YELLOW}Starting SSH tunnel and remote proxy...${NC}"
     echo -e "${YELLOW}Proxy output logging to: ${LOG_FILE}${NC}"
-    ssh -L ${CURRENT_PORT}:localhost:${CURRENT_PORT} ${REMOTE_HOST} \
+    ssh -o ControlPath="${CONTROL_PATH}" \
+        -L ${CURRENT_PORT}:localhost:${CURRENT_PORT} \
+        ${REMOTE_HOST} \
         "cd ${REMOTE_PROXY_DIR} && ./bin/apiproxy --argo-user=${ARGO_USER} -model ${MODEL} --port ${CURRENT_PORT}" \
         > "${LOG_FILE}" 2>&1 &
     
@@ -110,6 +134,6 @@ fi
 
 # Launch Claude Code
 echo -e "${GREEN}Launching Claude Code with proxy on port ${CURRENT_PORT}...${NC}"
-TMPDIR=/tmp/$USER ANTHROPIC_AUTH_TOKEN=$USER ANTHROPIC_BASE_URL=http://localhost:${CURRENT_PORT} claude
+CLAUDE_CODE_TMPDIR="/tmp/${USER}" ANTHROPIC_AUTH_TOKEN=$USER ANTHROPIC_BASE_URL=http://localhost:${CURRENT_PORT} claude
 
 # The cleanup function will be called automatically by the trap on exit

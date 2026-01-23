@@ -5,20 +5,11 @@ My notes for running against Argo at Argonne for IDE integration and agentic wor
 
 # Using Argo in Claude Code on LCF Login Nodes
 
-This assumes you have setup a valid SSH key for logging into `homes.cels.anl.gov` and have access to the Aurora login nodes.
+This assumes you have access to `homes.cels.anl.gov` and have access to the Aurora login nodes.
 
 ## Setup proxy on CELS homes
 
-Install go and add it to your path.
-
-```bash
-ssh homes.cels.anl.gov
-wget https://go.dev/dl/go1.25.5.linux-amd64.tar.gz
-sudo tar -C /usr/local -xzf go1.25.5.linux-amd64.tar.gz
-export PATH=$PATH:/usr/local/go/bin
-```
-
-Install lmtools-main
+Install lmtools-main (I found `go` was already installed on `homes.cels.anl.gov`).
 
 ```bash
 
@@ -41,7 +32,7 @@ curl -fsSL https://claude.ai/install.sh | bash
 
 ## Run Claude Code script
 
-This script will remotely launch the proxy on homes.cels.anl.gov and then launch Claude Code with the proxy configured.
+This script will remotely launch the proxy on `homes.cels.anl.gov` and then launch Claude Code with the proxy configured.
 
 ```bash
 ./argonne-claude.sh

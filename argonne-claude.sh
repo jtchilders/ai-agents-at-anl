@@ -5,7 +5,7 @@ REMOTE_HOST="homes.cels.anl.gov"
 REMOTE_PROXY_DIR="~/lmtools-main"
 LOCAL_PORT=8082
 MAX_PORT_ATTEMPTS=5
-ARGO_USER="jchilders"
+ARGO_USER=$USER
 MODEL="claudeopus45"
 
 # SSH ControlMaster settings

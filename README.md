@@ -9,14 +9,19 @@ This assumes you have access to `homes.cels.anl.gov` and have access to the Auro
 
 ## Setup proxy on CELS homes
 
-Install lmtools-main (I found `go` was already installed on `homes.cels.anl.gov`).
+Install lmtools-main.
 
 ```bash
+# install go
+wget https://go.dev/dl/go1.25.5.linux-amd64.tar.gz
+tar xf go1.25.5.linux-amd64.tar.gz
+export PATH=$HOME/go/bin:$PATH
 
+# now lmtools
 wget https://github.com/jxy/lmtools/archive/refs/heads/main.zip
 unzip main.zip
 cd lmtools-main
-make
+make build
 export PATH=$PATH:$(pwd)/bin
 ```
 

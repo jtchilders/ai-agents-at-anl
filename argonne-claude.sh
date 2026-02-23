@@ -7,6 +7,7 @@ LOCAL_PORT=8082
 MAX_PORT_ATTEMPTS=5
 ARGO_USER=$USER
 MODEL="claudeopus45"
+CLAUDE_EXECUTABLE="${CLAUDE_EXECUTABLE:-claude}"
 
 # SSH ControlMaster settings
 CONTROL_PATH="/tmp/ssh-control-argonne-%r@%h:%p"
@@ -134,6 +135,6 @@ fi
 
 # Launch Claude Code
 echo -e "${GREEN}Launching Claude Code with proxy on port ${CURRENT_PORT}...${NC}"
-CLAUDE_CODE_TMPDIR="/tmp/${USER}" ANTHROPIC_AUTH_TOKEN=$USER ANTHROPIC_BASE_URL=http://localhost:${CURRENT_PORT} claude
+CLAUDE_CODE_TMPDIR="/tmp/${USER}" ANTHROPIC_AUTH_TOKEN=$USER ANTHROPIC_BASE_URL=http://localhost:${CURRENT_PORT} ${CLAUDE_EXECUTABLE}
 
 # The cleanup function will be called automatically by the trap on exit

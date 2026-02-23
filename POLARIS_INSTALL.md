@@ -1,33 +1,39 @@
-# Installing Claude Code on Polaris (ALCF)
+# Running Claude Code on Polaris (ALCF)
 
-The native installer's `claude install` subcommand crashes (SIGABRT) on the SLES 15 login nodes. The `install_claude_polaris.sh` script works around this by downloading the binary, verifying its checksum, and placing it manually.
+The native Claude Code binary crashes (SIGABRT) on the SLES 15 login nodes due to a Bun runtime compatibility issue. The workaround is to run Claude Code inside an Apptainer container using the npm/Node.js version.
 
 ## Quick Start
 
 ```bash
-bash install_claude_polaris.sh
+bash claude_polaris.sh
 ```
 
-This will:
-1. Download the latest Claude Code binary
-2. Verify the SHA-256 checksum
-3. Install to `~/.local/share/claude/claude`
-4. Create a symlink at `~/.local/bin/claude`
+On first run, this builds an Apptainer sandbox with Node.js and Claude Code (~30 seconds). Subsequent runs use the cached sandbox.
 
-`~/.local/bin` should already be on your `PATH` on Polaris. If not, add to your `~/.bashrc`:
+## Usage with argonne-claude.sh
+
+Set the `CLAUDE_EXECUTABLE` environment variable to use the Apptainer wrapper:
 
 ```bash
-export PATH="$HOME/.local/bin:$PATH"
+export CLAUDE_EXECUTABLE=~/path/to/claude_polaris.sh
+./argonne-claude.sh
 ```
+
+Or add the export to your `~/.bashrc` on Polaris.
 
 ## Updating
 
-Re-run the script to download and install the latest version.
-
-## Cleanup
-
-Remove any core dumps from failed native installer attempts:
+Remove the sandbox and re-run to get the latest version:
 
 ```bash
-rm -f ~/core.* ~/claude-code-debug/core.*
+rm -rf claude-sandbox
+bash claude_polaris.sh
+```
+
+## Convenience Alias
+
+Add to your `~/.bashrc` on Polaris:
+
+```bash
+alias claude='bash ~/path/to/claude_polaris.sh'
 ```

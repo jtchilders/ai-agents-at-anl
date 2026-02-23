@@ -36,13 +36,20 @@ curl -fsSL https://claude.ai/install.sh | bash
 
 ## Install Claude Code on Polaris Login Nodes
 
-The traditional install via curl fails, and installing Node/npm is a pain on Polaris.  So we'll install the binary manually.
+The native Claude Code binary crashes on Polaris (SLES 15) due to a Bun runtime issue. Instead, we run Claude Code inside an Apptainer container. See [POLARIS_INSTALL.md](POLARIS_INSTALL.md) for details.
 
 ```bash
-bash install_claude_polaris.sh
+bash claude_polaris.sh
 ```
 
-## Run Claude Code script
+To use with `argonne-claude.sh`, set the `CLAUDE_EXECUTABLE` variable:
+
+```bash
+export CLAUDE_EXECUTABLE=~/path/to/claude_polaris.sh
+./argonne-claude.sh
+```
+
+## Run Claude Code script on Aurora Login Nodes
 
 This script will remotely launch the proxy on `homes.cels.anl.gov` and then launch Claude Code with the proxy configured.
 

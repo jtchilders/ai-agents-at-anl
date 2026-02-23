@@ -2,7 +2,6 @@
 My notes for running against Argo at Argonne for IDE integration and agentic workflows.
 
 
-
 # Using Argo in Claude Code on LCF Login Nodes
 
 This assumes you have access to `homes.cels.anl.gov` and have access to the Aurora login nodes.
@@ -33,6 +32,14 @@ module load frameworks
 
 # installs in .local/bin
 curl -fsSL https://claude.ai/install.sh | bash
+```
+
+## Install Claude Code on Polaris Login Nodes
+
+The traditional install via curl fails, and installing Node/npm is a pain on Polaris.  So we'll install the binary manually.
+
+```bash
+bash install_claude_polaris.sh
 ```
 
 ## Run Claude Code script

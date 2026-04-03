@@ -6,7 +6,7 @@ REMOTE_PROXY_DIR="~/lmtools-main"
 LOCAL_PORT=8082
 MAX_PORT_ATTEMPTS=5
 ARGO_USER=$USER
-MODEL="claudeopus45"
+MODEL="claudeopus46"
 CLAUDE_EXECUTABLE="${CLAUDE_EXECUTABLE:-claude}"
 
 # SSH ControlMaster settings

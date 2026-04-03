@@ -1,28 +1,47 @@
 # ai-agents-at-anl
-My notes for running against Argo at Argonne for IDE integration and agentic workflows.
+Notes for running Claude Code with Argo at Argonne for IDE integration and agentic workflows.
 
 
-# Using Argo in Claude Code on LCF Login Nodes
+# Using Argo in Claude Code
 
-This assumes you have access to `homes.cels.anl.gov` and have access to the Aurora login nodes.
+This guide covers running Claude Code against the Argo LLM API from machines outside the ANL internal network (e.g., your laptop). It also covers installing Claude Code on Aurora and Polaris login nodes.
 
-## Setup proxy on CELS homes
+## Prerequisites
 
-Install lmtools-main.
+- SSH access to `homes.cels.anl.gov`
+- Python 3 with `aiohttp` installed (`pip install aiohttp`)
+- Claude Code installed ([install instructions](https://docs.anthropic.com/en/docs/claude-code/overview))
 
+## Quick Start (3 steps)
+
+Open three terminals:
+
+**Terminal 1** — Start the SSH tunnel:
 ```bash
-# install go
-wget https://go.dev/dl/go1.25.5.linux-amd64.tar.gz
-tar xf go1.25.5.linux-amd64.tar.gz
-export PATH=$HOME/go/bin:$PATH
-
-# now lmtools
-wget https://github.com/jxy/lmtools/archive/refs/heads/main.zip
-unzip main.zip
-cd lmtools-main
-make build
-export PATH=$PATH:$(pwd)/bin
+ssh -L 8082:apps.inside.anl.gov:443 -N homes.cels.anl.gov
 ```
+
+**Terminal 2** — Start the local proxy:
+```bash
+python claude-argo-proxy.py
+```
+
+**Terminal 3** — Launch Claude Code:
+```bash
+ANTHROPIC_BASE_URL="http://127.0.0.1:8083/argoapi/" ANTHROPIC_AUTH_TOKEN=$USER CLAUDE_CODE_SKIP_ANTHROPIC_AUTH=1 claude
+```
+
+Or use the convenience script that handles all three steps:
+```bash
+./argonne-claude.sh
+```
+
+## How It Works
+
+1. The SSH tunnel forwards local port 8082 to `apps.inside.anl.gov:443` through `homes.cels.anl.gov`
+2. `claude-argo-proxy.py` listens on port 8083, rewrites requests, and forwards them through the tunnel on port 8082
+3. Claude Code sends API requests to the local proxy, which routes them to the Argo API
+
 
 ## Install Claude Code on Aurora Login Nodes
 
@@ -49,21 +68,11 @@ export CLAUDE_EXECUTABLE=~/path/to/claude_polaris.sh
 ./argonne-claude.sh
 ```
 
-## Run Claude Code script on Aurora Login Nodes
-
-This script will remotely launch the proxy on `homes.cels.anl.gov` and then launch Claude Code with the proxy configured.
-
-```bash
-./argonne-claude.sh
-```
-
 
 ## Run PBS MCP Server as well
 
 ```bash
-
-git clone --recursivegit@github.com:jtchilders/pbs-mcp-demo.git
-
+git clone --recursive git@github.com:jtchilders/pbs-mcp-demo.git
 ```
 
 Need to add MCP to Claude config.

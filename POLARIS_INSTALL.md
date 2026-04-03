@@ -12,14 +12,14 @@ On first run, this builds an Apptainer sandbox with Node.js and Claude Code (~30
 
 ## Usage with argonne-claude.sh
 
-Set the `CLAUDE_EXECUTABLE` environment variable to use the Apptainer wrapper:
+Set the `CLAUDE_EXECUTABLE` environment variable to use the Apptainer wrapper with the launch script:
 
 ```bash
 export CLAUDE_EXECUTABLE=~/path/to/claude_polaris.sh
 ./argonne-claude.sh
 ```
 
-Or add the export to your `~/.bashrc` on Polaris.
+This starts the SSH tunnel, local proxy, and launches Claude Code inside the container. Or add the export to your `~/.bashrc` on Polaris.
 
 ## Updating
 

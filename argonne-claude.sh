@@ -9,6 +9,9 @@ PROXY_PORT=8083
 CLAUDE_EXECUTABLE="${CLAUDE_EXECUTABLE:-claude}"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
+# SSH ControlMaster settings
+CONTROL_PATH="/tmp/ssh-argo-claude-$$"
+
 # Colors for output
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -16,7 +19,6 @@ RED='\033[0;31m'
 NC='\033[0m' # No Color
 
 # Track PIDs for cleanup
-SSH_PID=""
 PROXY_PID=""
 
 # Cleanup function
@@ -27,9 +29,8 @@ cleanup() {
         kill ${PROXY_PID} 2>/dev/null
     fi
 
-    if [ -n "${SSH_PID}" ]; then
-        kill ${SSH_PID} 2>/dev/null
-    fi
+    # Close the SSH tunnel via control socket
+    ssh -O exit -o ControlPath="${CONTROL_PATH}" ${REMOTE_HOST} 2>/dev/null || true
 
     echo -e "${GREEN}Done!${NC}"
     exit 0
@@ -47,16 +48,17 @@ if lsof -i :${TUNNEL_LOCAL_PORT} >/dev/null 2>&1; then
     exit 1
 fi
 
-# Step 1: Start SSH tunnel
+# Step 1: Start SSH tunnel (ssh -f backgrounds after MFA authentication completes)
 echo -e "${YELLOW}Starting SSH tunnel to ${TUNNEL_REMOTE_HOST}...${NC}"
 echo -e "${YELLOW}(You may need to complete MFA authentication)${NC}"
 
-ssh -L ${TUNNEL_LOCAL_PORT}:${TUNNEL_REMOTE_HOST}:${TUNNEL_REMOTE_PORT} -N ${REMOTE_HOST} &
-SSH_PID=$!
+ssh -f -N \
+    -o ControlMaster=yes \
+    -o ControlPath="${CONTROL_PATH}" \
+    -L ${TUNNEL_LOCAL_PORT}:${TUNNEL_REMOTE_HOST}:${TUNNEL_REMOTE_PORT} \
+    ${REMOTE_HOST}
 
-sleep 3
-
-if ! kill -0 ${SSH_PID} 2>/dev/null; then
+if [ $? -ne 0 ]; then
     echo -e "${RED}SSH tunnel failed to start. Check your credentials and MFA.${NC}"
     exit 1
 fi

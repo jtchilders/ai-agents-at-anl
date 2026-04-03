@@ -83,7 +83,7 @@ echo -e "${GREEN}Local proxy running (port ${PROXY_PORT})!${NC}"
 # Step 3: Launch Claude Code
 echo -e "${GREEN}Launching Claude Code...${NC}"
 ANTHROPIC_BASE_URL="http://127.0.0.1:${PROXY_PORT}/argoapi/" \
-    ANTHROPIC_AUTH_TOKEN=$USER \
+    ANTHROPIC_AUTH_TOKEN=${ARGO_USER:-$USER} \
     CLAUDE_CODE_SKIP_ANTHROPIC_AUTH=1 \
     ${CLAUDE_EXECUTABLE}
 

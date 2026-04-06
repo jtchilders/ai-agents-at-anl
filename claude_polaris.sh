@@ -16,7 +16,7 @@ module load apptainer 2>/dev/null
 # Build sandbox if it doesn't exist
 if [ ! -d "$SANDBOX" ]; then
   echo "Building Claude Code container (one-time setup)..."
-  apptainer build --sandbox "$SANDBOX" docker://node:22-slim
+  apptainer build --sandbox "$SANDBOX" docker://node:22
   apptainer exec --writable "$SANDBOX" npm install -g @anthropic-ai/claude-code
   echo "Done."
 fi

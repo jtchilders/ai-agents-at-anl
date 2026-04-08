@@ -55,17 +55,9 @@ curl -fsSL https://claude.ai/install.sh | bash
 
 ## Install Claude Code on Polaris Login Nodes
 
-The native Claude Code binary crashes on Polaris (SLES 15) due to a Bun runtime issue. Instead, we run Claude Code inside an Apptainer container. See [POLARIS_INSTALL.md](POLARIS_INSTALL.md) for details.
-
 ```bash
-bash claude_polaris.sh
-```
-
-To use with `argonne-claude.sh`, set the `CLAUDE_EXECUTABLE` variable:
-
-```bash
-export CLAUDE_EXECUTABLE=~/path/to/claude_polaris.sh
-./argonne-claude.sh
+# installs in .local/bin
+curl -fsSL https://claude.ai/install.sh | bash
 ```
 
 

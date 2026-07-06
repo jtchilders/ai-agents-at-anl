@@ -1,0 +1,64 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "enabled_providers": ["argo"],
+  "share": "disabled",
+  "autoupdate": "notify",
+  "permission": {"edit": "ask"},
+  "experimental": {"openTelemetry": false},
+  "provider": {
+    "argo": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Argo Gateway API",
+      "options": {
+        "baseURL": "http://127.0.0.1:{env:OPENCODE_PROXY_PORT}/argoapi/v1",
+        "headers": {
+          "Authorization": "Bearer ENTER-YOUR-ARGONNE-DOMAIN-USERNAME"
+        }
+      },
+      "models": {
+        "gpt55": {
+          "name": "GPT-5.5",
+          "modalities": {
+            "input": ["text", "image"],
+            "output": ["text"]
+          }
+        },
+        "claudeopus48": {
+          "name": "Claude Opus 4.8",
+          "modalities": {
+            "input": ["text", "image"],
+            "output": ["text"]
+          }
+        },
+          "claudesonnet46": {
+            "name": "Claude Sonnet 4.6",
+            "modalities": {
+              "input": ["text", "image"],
+              "output": ["text"]
+            }
+        },
+          "claudehaiku45": {
+            "name": "Claude Haiku 4.5",
+            "modalities": {
+              "input": ["text", "image"],
+              "output": ["text"]
+            }
+        },
+          "gemini31flashlite": {
+            "name": "Gemini 3.1 Flash Lite",
+            "modalities": {
+              "input":  ["text", "image"],
+              "output": ["text"]
+            }
+        },
+          "gemini35flash": {
+            "name": "Gemini 3.5 Flash",
+            "modalities": {
+              "input": ["text", "image"],
+              "output": ["text"]
+            }
+         }
+      }
+    }
+  }
+}

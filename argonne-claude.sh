@@ -2,10 +2,10 @@
 
 # Configuration
 REMOTE_HOST=homes-gce #"homes.cels.anl.gov"
-TUNNEL_LOCAL_PORT=8182
+TUNNEL_LOCAL_PORT=8555
 TUNNEL_REMOTE_HOST="apps.inside.anl.gov"
 TUNNEL_REMOTE_PORT=443
-PROXY_PORT=8183
+PROXY_PORT=8556
 CLAUDE_EXECUTABLE="${CLAUDE_EXECUTABLE:-claude}"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 

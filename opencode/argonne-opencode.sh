@@ -2,10 +2,10 @@
 
 # Configuration
 REMOTE_HOST=homes-gce #"homes.cels.anl.gov"
-TUNNEL_LOCAL_PORT=8282
+TUNNEL_LOCAL_PORT=8557
 TUNNEL_REMOTE_HOST="apps-dev.inside.anl.gov"
 TUNNEL_REMOTE_PORT=443
-PROXY_PORT=8283
+PROXY_PORT=8558
 OPENCODE_EXECUTABLE="${OPENCODE_EXECUTABLE:-opencode}"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
@@ -44,6 +44,14 @@ cleanup() {
 
 # Trap Ctrl+C and other exit signals
 trap cleanup SIGINT SIGTERM EXIT
+
+# First-time setup notice
+echo -e "${YELLOW}NOTE: A sample opencode config is provided at:${NC}"
+echo -e "${YELLOW}  ${SCRIPT_DIR}/opencode.json${NC}"
+echo -e "${YELLOW}If you haven't already, copy it to ~/.config/opencode/opencode.json${NC}"
+echo -e "${YELLOW}and edit the Authorization header to your Argonne domain username:${NC}"
+echo -e "${YELLOW}  cp ${SCRIPT_DIR}/opencode.json ~/.config/opencode/opencode.json${NC}"
+echo ""
 
 echo -e "${GREEN}Starting Argonne opencode setup...${NC}"
 
@@ -99,6 +107,6 @@ echo -e "${YELLOW}Point your opencode config baseURL to: http://127.0.0.1:${PROX
 
 # Step 3: Launch opencode
 echo -e "${GREEN}Launching opencode...${NC}"
-${OPENCODE_EXECUTABLE}
+OPENCODE_PROXY_PORT=${PROXY_PORT} ${OPENCODE_EXECUTABLE}
 
 # The cleanup function will be called automatically by the trap on exit

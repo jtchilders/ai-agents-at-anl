@@ -1,4 +1,14 @@
 #!/bin/bash
+# Launch Claude Code against Argonne's Argo Gateway from an off-network machine.
+#
+# Opens an SSH tunnel to Argo through homes.cels.anl.gov, starts the local HTTP proxy,
+# then launches Claude Code wired to it. Cleans everything up on exit.
+#
+# See guides/claude-code-argo.md (Option B). If you are ON the ANL network/VPN or on an
+# ALCF login node, you do NOT need this script — use Option A's env vars directly.
+#
+#   ./scripts/argonne-claude.sh
+#   ARGO_USER=jchilders ./scripts/argonne-claude.sh   # if your ANL username != $USER
 
 # Configuration
 REMOTE_HOST="homes.cels.anl.gov"
@@ -21,22 +31,15 @@ NC='\033[0m' # No Color
 # Track PIDs for cleanup
 PROXY_PID=""
 
-# Cleanup function
 cleanup() {
     echo -e "\n${YELLOW}Cleaning up...${NC}"
-
     if [ -n "${PROXY_PID}" ]; then
         kill ${PROXY_PID} 2>/dev/null
     fi
-
-    # Close the SSH tunnel via control socket
     ssh -O exit -o ControlPath="${CONTROL_PATH}" ${REMOTE_HOST} 2>/dev/null || true
-
     echo -e "${GREEN}Done!${NC}"
     exit 0
 }
-
-# Trap Ctrl+C and other exit signals
 trap cleanup SIGINT SIGTERM EXIT
 
 echo -e "${GREEN}Starting Argonne Claude setup...${NC}"
@@ -67,10 +70,8 @@ echo -e "${GREEN}SSH tunnel established (port ${TUNNEL_LOCAL_PORT})!${NC}"
 
 # Step 2: Start local proxy
 echo -e "${YELLOW}Starting local proxy...${NC}"
-
 python3 "${SCRIPT_DIR}/claude-argo-proxy.py" &
 PROXY_PID=$!
-
 sleep 2
 
 if ! kill -0 ${PROXY_PID} 2>/dev/null; then

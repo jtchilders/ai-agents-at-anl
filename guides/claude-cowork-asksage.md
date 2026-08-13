@@ -21,8 +21,11 @@ LiteLLM/Portkey proxy in between.
 
 - **Claude Desktop** installed (macOS or Windows), on a build that supports **Cowork on 3P**:
   <https://claude.com/download>
-- An **Ask Sage account** and a valid **user API key**.
-- Confirm the **instance** your organization approved (these docs use `api.asksage.ai`).
+- An **Ask Sage API key** from Argonne's ANL-hosted instance. Get it at
+  **<https://chat.asksage.anl.gov/>**: log in with **ANL SSO** → click your **user profile
+  (bottom left)** to open **Settings** → **API Keys** tab → **generate** a key and **copy** it.
+  Treat it like a password. (These docs use `api.asksage.anl.gov`; match the base URL to the
+  instance you get your key from.)
 
 ---
 
@@ -36,7 +39,7 @@ hand-editing of plist files.
 2. Open **Developer → Configure third-party inference**.
 3. Choose **Gateway** as the inference provider.
 4. Set the fields:
-   - **Base URL:** `https://api.asksage.ai/server/anthropic` (**no trailing slash**)
+   - **Base URL:** `https://api.asksage.anl.gov/server/anthropic` (**no trailing slash**)
    - **API key:** your Ask Sage user API key
    - **Auth scheme:** `bearer`
 5. (Recommended) Apply the [telemetry-disable settings](#locking-down-telemetry-to-anthropic)
@@ -45,7 +48,7 @@ hand-editing of plist files.
    once at launch).
 
 The model picker auto-discovers available models from
-`https://api.asksage.ai/server/anthropic/v1/models` — you do **not** have to list models
+`https://api.asksage.anl.gov/server/anthropic/v1/models` — you do **not** have to list models
 manually.
 
 ---
@@ -68,7 +71,7 @@ Minimal working config:
   "deploymentMode": "3p",
   "enterpriseConfig": {
     "inferenceProvider": "gateway",
-    "inferenceGatewayBaseUrl": "https://api.asksage.ai/server/anthropic",
+    "inferenceGatewayBaseUrl": "https://api.asksage.anl.gov/server/anthropic",
     "inferenceGatewayApiKey": "YOUR_ASKSAGE_API_KEY",
     "inferenceGatewayAuthScheme": "bearer",
     "deploymentOrganizationUuid": "REPLACE-WITH-A-GENERATED-UUID",
@@ -140,7 +143,7 @@ traffic is to Ask Sage. Set all four to `true`:
 ```json
 {
   "inferenceProvider":            "gateway",
-  "inferenceGatewayBaseUrl":      "https://api.asksage.ai/server/anthropic",
+  "inferenceGatewayBaseUrl":      "https://api.asksage.anl.gov/server/anthropic",
   "inferenceGatewayApiKey":       "YOUR_ASKSAGE_API_KEY",
   "inferenceGatewayAuthScheme":   "bearer",
   "deploymentOrganizationUuid":   "REPLACE-WITH-A-GENERATED-UUID",
@@ -164,7 +167,7 @@ Even fully locked down, Cowork needs these three:
 
 - `downloads.claude.ai` — the VM workspace bundle + Claude CLI binary, fetched at session
   start. **Without this, Cowork sessions cannot start.**
-- `api.asksage.ai` (or your instance host) — model inference.
+- `api.asksage.anl.gov` (or your instance host) — model inference.
 - Host of your `otlpEndpoint` — only if you configure your own OTLP telemetry collector
   (optional; see below).
 
@@ -238,7 +241,7 @@ Paste this, replacing the two placeholders:
   "deploymentMode": "3p",
   "enterpriseConfig": {
     "inferenceProvider": "gateway",
-    "inferenceGatewayBaseUrl": "https://api.asksage.ai/server/anthropic",
+    "inferenceGatewayBaseUrl": "https://api.asksage.anl.gov/server/anthropic",
     "inferenceGatewayApiKey": "YOUR_ASKSAGE_TOKEN_HERE",
     "inferenceGatewayAuthScheme": "bearer",
     "deploymentOrganizationUuid": "REPLACE-WITH-GENERATED-UUID",
@@ -294,7 +297,7 @@ Type "hi" and send — you should get a response within a few seconds. If it han
 endpoint directly:
 
 ```cmd
-curl -N -X POST "https://api.asksage.ai/server/anthropic/v1/messages" ^
+curl -N -X POST "https://api.asksage.anl.gov/server/anthropic/v1/messages" ^
   -H "Authorization: Bearer YOUR_ASKSAGE_TOKEN" ^
   -H "Content-Type: application/json" ^
   -d "{\"model\":\"claude-sonnet-4-5\",\"max_tokens\":64,\"stream\":true,\"messages\":[{\"role\":\"user\",\"content\":\"hi\"}]}"

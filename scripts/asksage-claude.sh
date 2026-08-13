@@ -12,7 +12,7 @@
 
 # Match this to the instance your organization approved. Only the middle segment changes;
 # the api. prefix and /server/anthropic suffix are stable across deployments.
-ASKSAGE_BASE_URL="${ASKSAGE_BASE_URL:-https://api.asksage.ai/server/anthropic}"
+ASKSAGE_BASE_URL="${ASKSAGE_BASE_URL:-https://api.asksage.anl.gov/server/anthropic}"
 CLAUDE_EXECUTABLE="${CLAUDE_EXECUTABLE:-claude}"
 KEY_FILE="${HOME}/.config/asksage/key"
 

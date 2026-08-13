@@ -1,2 +1,0 @@
-# For scripts/claude-argo-proxy.py (the off-network Argo proxy for Claude Code).
-aiohttp>=3.9

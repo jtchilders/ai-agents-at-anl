@@ -70,16 +70,18 @@ Full endpoint/auth/model details for both: **[guides/reference.md](guides/refere
 ├── README.md                        # you are here
 ├── guides/
 │   ├── reference.md                 # endpoints, auth, model names, gotchas (shared)
-│   ├── claude-code-argo.md          # Claude Code  ->  Argo   (on-network + tunnel/proxy)
+│   ├── claude-code-argo.md          # Claude Code  ->  Argo   (on-network + argo-shim off-network)
 │   ├── claude-code-asksage.md       # Claude Code  ->  Ask Sage
 │   ├── claude-cowork-asksage.md     # Claude Cowork -> Ask Sage (macOS + Windows MSIX)
 │   └── claude-cowork-argo.md        # Claude Cowork -> Argo    (3P Gateway pointed at Argo)
-├── scripts/
-│   ├── claude-argo-proxy.py         # local HTTP proxy for off-network Argo (Claude Code)
-│   ├── argonne-claude.sh            # one-command tunnel + proxy + Claude Code (Argo)
-│   └── asksage-claude.sh            # one-command Claude Code launcher (Ask Sage)
-└── requirements.txt                 # aiohttp, for the Argo proxy
+└── scripts/
+    └── asksage-claude.sh            # optional one-command Claude Code launcher (Ask Sage)
 ```
+
+For off-network / on-node access to **Argo**, the guides use
+[**argo-shim**](https://github.com/n-getty/argo-shim) (`pip install argo-shim`), a maintained
+SSH-tunnel proxy — we no longer ship our own proxy scripts. **Ask Sage** is a public HTTPS
+endpoint and needs no proxy at all.
 
 ---
 

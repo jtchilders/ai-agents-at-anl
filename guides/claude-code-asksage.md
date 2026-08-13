@@ -8,6 +8,12 @@ as long as you have an Ask Sage API key.
 This is the simplest of the four combinations: point Claude Code at Ask Sage's base URL and
 authenticate with your Ask Sage key.
 
+> **No proxy/shim needed here.** The [argo-shim](https://github.com/n-getty/argo-shim) tool
+> used in the [Code + Argo guide](claude-code-argo.md) is Argo-specific — it tunnels to
+> `apps.inside.anl.gov`, injects the ALCF `user` field, and rewrites paths to `/argoapi/...`.
+> Ask Sage is a public HTTPS Anthropic-compatible endpoint, so Claude Code connects to it
+> directly. Don't point argo-shim at Ask Sage.
+
 ---
 
 ## Prerequisites

@@ -40,12 +40,13 @@ that has outbound HTTPS to both hosts, and point the gateway base URL straight a
 `downloads.claude.ai` is reachable — this is the single most likely thing to block you.
 
 > **Off-network laptop option (advanced, unverified):** you'd need Argo reachable at an
-> HTTPS URL the Cowork sandbox can dial. The SSH tunnel + local **HTTP** proxy from the Code
-> guide won't directly work here, because (a) the Cowork Gateway base URL should be HTTPS and
-> (b) the sandbox VM's network namespace may not see your host's `127.0.0.1`. Making this work
-> would require exposing the tunnel as a TLS endpoint the sandbox can reach and adding its
-> host to `coworkEgressAllowedHosts`. This is not documented or tested — prefer the on-VPN
-> setup above, or use [Code + Argo](claude-code-argo.md) off-network.
+> HTTPS URL the Cowork sandbox can dial. [argo-shim](https://github.com/n-getty/argo-shim) —
+> the tool the [Code + Argo guide](claude-code-argo.md) uses — won't directly work here,
+> because (a) it exposes a local **HTTP** proxy while the Cowork Gateway base URL should be
+> HTTPS, and (b) the sandbox VM's network namespace may not see your host's `127.0.0.1`.
+> Making this work would require exposing the tunnel as a TLS endpoint the sandbox can reach
+> and adding its host to `coworkEgressAllowedHosts`. This is not documented or tested — prefer
+> the on-VPN setup above, or use [Code + Argo](claude-code-argo.md) off-network.
 
 ---
 

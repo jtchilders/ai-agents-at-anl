@@ -43,7 +43,7 @@ proxy approach in the [Claude Code + Argo guide](claude-code-argo.md).
 Argo does **not** issue API keys. You authenticate by passing your **ANL domain username**
 wherever a tool asks for an API key or token.
 
-- Use just the username (e.g. `jchilders`), **not** your full email address.
+- Use just the username (e.g. `alice`), **not** your full email address.
 - Do **not** wrap it in quotes or add special characters.
 - `ac.` accounts are not authorized.
 - The username is validated against a directory lookup (cached 24 h) and is logged for

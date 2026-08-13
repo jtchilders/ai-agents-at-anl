@@ -55,7 +55,7 @@ claude
 ```
 
 - `ANTHROPIC_AUTH_TOKEN` is your **ANL username** (`$USER` if your shell user matches; set it
-  explicitly otherwise, e.g. `ANTHROPIC_AUTH_TOKEN=jchilders`).
+  explicitly otherwise, e.g. `ANTHROPIC_AUTH_TOKEN=alice`).
 - `CLAUDE_CODE_SKIP_ANTHROPIC_AUTH=1` disables the normal claude.ai OAuth login.
 
 ---

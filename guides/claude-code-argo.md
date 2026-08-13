@@ -13,14 +13,6 @@ Claude Code talks to an Anthropic-style Messages API. Argo exposes exactly that 
   a maintained tool that builds the SSH tunnel, runs a local proxy, and wires up Claude Code
   for you.
 
-> **Why argo-shim instead of a hand-rolled proxy?** We previously shipped our own SSH-tunnel +
-> proxy scripts here. `argo-shim` (published on PyPI, `pip install argo-shim`) does the same
-> job and more, and is actively maintained, so we now recommend it and no longer ship our own
-> scripts. Beyond tunneling it: auto-writes `~/.claude/settings.json`, forces `stream:true` to
-> dodge Argo's non-stream 500, derives a stable per-user port, supports compute nodes and a
-> Mac relay — and, importantly, has **SSH-failure protection** that stops a restart loop from
-> getting a shared login node's IP blocked by CSPO (see the safety note below).
-
 ---
 
 ## Prerequisites
@@ -28,8 +20,9 @@ Claude Code talks to an Anthropic-style Messages API. Argo exposes exactly that 
 - Argo access **approved** by your DOO / AI Rep (see [reference](reference.md#access-approval-do-this-first)).
 - Your **ANL domain username** (this is your Argo credential — not a secret).
 - **Claude Code** installed: `curl -fsSL https://claude.ai/install.sh | bash`
-- For the argo-shim path: **SSH access to CELS** with a key uploaded to
-  <https://accounts.cels.anl.gov>, and Python 3.8+.
+- For the argo-shim path: a working **CELS account** and the ability to **log into CELS on the
+  command line via SSH** before you start (see
+  [CELS account setup](https://help.cels.anl.gov/docs/linux/gce-accounts/)), plus Python 3.8+.
 
 ---
 
@@ -65,21 +58,12 @@ claude
 [argo-shim](https://github.com/n-getty/argo-shim) reaches Argo over an SSH tunnel to CELS,
 runs a local HTTP→HTTPS proxy, and configures Claude Code automatically.
 
-### One-time SSH setup (do this first — do not skip)
+### Before you start
 
-argo-shim's tunnel only works if CELS recognizes your SSH key. Set it up **and verify it**
-before running argo-shim:
-
-```bash
-ssh-keygen -t ed25519          # press Enter at every prompt
-cat ~/.ssh/id_ed25519.pub      # copy this, paste into the SSH Keys section at
-                               #   https://accounts.cels.anl.gov  (public key only!)
-ssh-add                        # load the key into your agent
-# Must log in WITHOUT a password prompt (exit 0, no output):
-ssh -o BatchMode=yes -J logins.cels.anl.gov homes.cels.anl.gov true
-```
-
-If that last command fails, fix it here — argo-shim cannot work until it succeeds.
+You must have a working **CELS account** and be able to **log into CELS on the command line
+via SSH** — argo-shim reaches Argo over an SSH tunnel to CELS, so this has to work first. If you
+don't have a CELS account or SSH set up yet, follow the CELS documentation:
+[CELS account setup](https://help.cels.anl.gov/docs/linux/gce-accounts/).
 
 > ⚠️ **Do not restart argo-shim in a loop if it fails.** ALCF login nodes are shared; too many
 > failed SSH logins from one IP get the **whole node blocked** by CSPO security, breaking Argo
@@ -205,8 +189,7 @@ Restart Claude Code; you can now drive PBS jobs via the `pbs` MCP server.
 |---|---|---|
 | `connection refused` / hangs (Option A) | Not on ANL network | Use Option B (argo-shim) |
 | `401` / username validation error | Wrong `ANTHROPIC_AUTH_TOKEN` | Bare ANL username — no email, no quotes |
-| argo-shim prints "No SSH key found" and exits | SSH key not set up | Do the [one-time SSH setup](#one-time-ssh-setup-do-this-first--do-not-skip) |
-| `Permission denied (publickey)` | Public key not on CELS account | Upload `~/.ssh/id_ed25519.pub` at accounts.cels.anl.gov, then `ssh-add` |
+| argo-shim can't reach CELS (`No SSH key found`, `Permission denied (publickey)`) | CELS account / SSH login not working | Confirm you can SSH into CELS from the command line first — see [CELS account setup](https://help.cels.anl.gov/docs/linux/gce-accounts/) |
 | "SSH attempts are paused / HARD-LOCKED" | Repeated auth failures | Fix SSH auth, wait out cooldown, then `argo-shim --reset` |
 | Claude Code won't pick up new port/token | It reads settings only at startup | Restart Claude Code after (re)starting the shim |
 | `[SSL: WRONG_VERSION_NUMBER]` | Stale SSH ControlMaster tunnel | `ssh -O exit homes.cels.anl.gov` then `argo-shim` |

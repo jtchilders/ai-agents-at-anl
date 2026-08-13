@@ -23,8 +23,9 @@ follow that one guide end-to-end.
 - **Argo** — Argonne's internal LLM gateway (`apps.inside.anl.gov`). Auth is your **ANL
   username**. Requires the **ANL network/VPN** (or an SSH tunnel) and **DOO/AI-Rep approval**.
   Also serves OpenAI and Google models.
-- **Ask Sage** — an external, gov-authorized gateway (`api.asksage.ai`). Auth is a real **API
-  key**. Works over the **public internet** — no VPN. Claude models only.
+- **Ask Sage** — a gov-authorized gateway; ANL runs its own instance (`api.asksage.anl.gov`,
+  key via ANL SSO at `chat.asksage.anl.gov`). Auth is a real **API key**. Works over **HTTPS
+  from anywhere** — no VPN. Claude models only.
 
 Full endpoint/auth/model details for both: **[guides/reference.md](guides/reference.md)**.
 

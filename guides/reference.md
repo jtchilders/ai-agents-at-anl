@@ -11,7 +11,7 @@ requirements.
 | | **Argo** | **Ask Sage** |
 |---|---|---|
 | Operator | Argonne (internal) | Ask Sage (external SaaS, gov-authorized) |
-| Base host | `https://apps.inside.anl.gov/argoapi` | `https://api.asksage.ai/server/anthropic` |
+| Base host | `https://apps.inside.anl.gov/argoapi` | `https://api.asksage.anl.gov/server/anthropic` |
 | Auth credential | Your **ANL domain username** (not a secret) | A real **Ask Sage API key** |
 | Network requirement | ANL internal network or VPN (or SSH tunnel) | Public internet |
 | Access approval | DOO / Directorate AI Rep approval required | Ask Sage account + API key |
@@ -118,23 +118,27 @@ Claude Code and Cowork stream by default, so this mostly affects hand-rolled API
 
 ## Ask Sage
 
-Ask Sage is an external, government-authorized LLM gateway that exposes an
-**Anthropic-compatible** API. It is the backend used for the "Cowork on 3P" path and works
-over the public internet (no ANL VPN required).
+Ask Sage is a government-authorized LLM gateway that exposes an **Anthropic-compatible** API.
+Argonne runs an **ANL-hosted instance** (ANL SSO), which is what these docs use. It works over
+HTTPS from anywhere — no ANL VPN required.
 
-> **Instance note:** These docs use the `chat.asksage.ai` / `api.asksage.ai` instance. The
-> `api.` prefix and the `/server/anthropic` path suffix are stable across deployments — only
-> the instance segment in the middle changes. Always match the base URL to the instance your
-> organization approved and that you authenticate against.
+- Chat / key management UI: <https://chat.asksage.anl.gov/> (log in with **ANL SSO**)
+- API base URL: `https://api.asksage.anl.gov/server/anthropic`
+
+> **Instance note:** The `api.` prefix and the `/server/anthropic` path suffix are stable — only
+> the host in the middle changes between deployments (e.g. the public `api.asksage.ai`). Always
+> match the base URL to the instance you get your key from. For ANL, that's `api.asksage.anl.gov`.
 
 ### Authentication
 
-You need a **valid Ask Sage user API key** (a real secret — get it from your Ask Sage
-account). Pass it with the **`bearer`** auth scheme.
+You need a **valid Ask Sage user API key** (a real secret). Get it from the ANL Ask Sage portal:
+**<https://chat.asksage.anl.gov/>** → log in with ANL SSO → click your **user profile (bottom
+left)** to open **Settings** → **API Keys** tab → **generate** a key and **copy** it. Pass it
+with the **`bearer`** auth scheme.
 
 ### Endpoints
 
-Base URL: `https://api.asksage.ai/server/anthropic`
+Base URL: `https://api.asksage.anl.gov/server/anthropic`
 
 | Purpose | Method + Path |
 |---|---|
@@ -144,18 +148,18 @@ Base URL: `https://api.asksage.ai/server/anthropic`
 Verify reachability:
 
 ```bash
-curl -s https://api.asksage.ai/server/anthropic/v1/models \
-  -H "x-api-key: YOUR_ASKSAGE_API_KEY" | jq
+curl -s https://api.asksage.anl.gov/server/anthropic/v1/models \
+  -H "x-api-key: YOUR_A...KEY" | jq
 ```
 
-You should get a JSON `data` array with `claude-opus-4-8`, `claude-opus-4-7`,
-`claude-sonnet-4-5`, etc. A 404 means the instance predates the model-list endpoint —
-contact Ask Sage support.
+You should get a JSON `data` array with `claude-opus-4-8`, `claude-sonnet-5`, etc. A 404 on the
+path means you're pointed at the wrong base URL.
 
 ### Model names (Anthropic IDs)
 
-Ask Sage uses Anthropic's model IDs directly: `claude-opus-4-8`, `claude-opus-4-7`,
-`claude-opus-4-6`, `claude-sonnet-4-6`, `claude-sonnet-4-5`, `claude-haiku-4-5`.
+Ask Sage uses Anthropic's model IDs directly (e.g. `claude-opus-5`, `claude-opus-4-8`,
+`claude-opus-4-7`, `claude-sonnet-5`). Run the model-list curl above to see the current set
+offered by the ANL instance.
 
 **1M-token context** is available on Opus 4.8, 4.7, and 4.6 (they forward the
 `context-1m-2025-08-07` Anthropic beta header). Cowork surfaces this via a `supports1m` flag

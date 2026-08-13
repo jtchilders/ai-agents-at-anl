@@ -141,8 +141,8 @@ substituting the Argo base URL and your ANL username for the key.
 If you apply a locked-down profile, allowlist these on HTTPS 443:
 
 - `downloads.claude.ai` — **required** for sessions to start.
-- `apps.inside.anl.gov` — Argo inference. (Replace `api.asksage.ai` from the Ask Sage profile
-  with this host.)
+- `apps.inside.anl.gov` — Argo inference. (Replace `api.asksage.anl.gov` from the Ask Sage
+  profile with this host.)
 - Your `otlpEndpoint` host — only if you set one.
 
 ---

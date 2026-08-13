@@ -83,6 +83,30 @@ claude
 > **Keep the key out of your shell history.** Load it from a file that isn't committed (as
 > above), not as a literal on the command line.
 
+### Switching from the Argo / argo-shim path
+
+If you previously used Claude Code with **Argo** via [argo-shim](claude-code-argo.md), the shim
+wrote an `env` block into `~/.claude/settings.json` pointing `ANTHROPIC_BASE_URL` at a **local
+proxy** (`http://127.0.0.1:<port>`). That file **takes precedence over your environment
+variables**, so Ask Sage launches will silently ignore the env above and try to reach the (now
+stopped) local proxy — you'll get **`connection refused`**, not an auth error.
+
+Before using Ask Sage, clear the shim's leftovers:
+
+```bash
+# Inspect what's there:
+cat ~/.claude/settings.json
+```
+
+If you see an `env` block with a `127.0.0.1` / `localhost` `ANTHROPIC_BASE_URL`, remove that
+block (or delete the whole file if you didn't add anything else to it):
+
+```bash
+rm ~/.claude/settings.json     # only if it holds nothing you want to keep
+```
+
+Then relaunch with the Ask Sage env from Step 3.
+
 ### Convenience wrapper
 
 A small launcher is included at [`scripts/asksage-claude.sh`](../scripts/asksage-claude.sh).
@@ -127,6 +151,7 @@ token change.
 
 | Symptom | Likely cause | Fix |
 |---|---|---|
+| `connection refused` / can't connect | Leftover **argo-shim** settings in `~/.claude/settings.json` point `ANTHROPIC_BASE_URL` at `http://127.0.0.1:<port>`, and `settings.json` **overrides** your env vars — so Claude Code dials a local proxy that isn't running | Remove the shim's `env` block (or the whole `settings.json`) — see the [switching-from-Argo note](#switching-from-the-argo--argo-shim-path) — then relaunch. `connection refused` (vs `401`) means wrong/local **address**, not a bad key |
 | `401 Unauthorized` | Bad or missing key | Re-check `ANTHROPIC_AUTH_TOKEN`; regenerate the key at <https://chat.asksage.anl.gov/> and test with the Step 2 curl |
 | `404` on `/v1/models` | Wrong base URL | Use `https://api.asksage.anl.gov/server/anthropic` (no trailing slash) |
 | Model picker empty | Discovery failed | Verify key; confirm the base URL has no trailing slash |

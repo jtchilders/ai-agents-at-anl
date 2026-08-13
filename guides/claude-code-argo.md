@@ -71,19 +71,65 @@ don't have a CELS account or SSH set up yet, follow the CELS documentation:
 > enforces a cooldown/lockout after repeated auth failures (`argo-shim --status` to inspect,
 > `argo-shim --reset` to clear after you've fixed auth). Read the error, fix that, try once.
 
+### Install argo-shim
+
+argo-shim is on PyPI. Pick either:
+
+```bash
+# Option 1 — run without installing (recommended; always gets the latest):
+uvx argo-shim --help
+
+# Option 2 — install it once, then run `argo-shim` directly:
+pip install argo-shim      # or: pipx install argo-shim
+argo-shim --help
+```
+
+`uvx` needs [uv](https://docs.astral.sh/uv/) (`curl -LsSf https://astral.sh/uv/install.sh | sh`).
+If you install with `pip install --user` or `pipx`, make sure `~/.local/bin` is on your `PATH`.
+
+To upgrade later: `uvx` always fetches the latest; a `pip` install upgrades with
+`pip install -U argo-shim`.
+
+### Set a custom username
+
+argo-shim uses your login username by default. You need to override it in two cases:
+
+- **Your CELS username differs from your local login name** (the name argo-shim SSHes to CELS
+  with). Set `CELS_USERNAME`:
+
+  ```bash
+  CELS_USERNAME=<your-cels-username> argo-shim
+  ```
+
+- **Your ALCF username differs too** — Argo validates requests against your ALCF username, so
+  set `ARGO_USER` (falls back to `CELS_USERNAME`, then your login name if unset):
+
+  ```bash
+  ARGO_USER=<your-alcf-username> CELS_USERNAME=<your-cels-username> argo-shim
+  ```
+
+Export them in your shell profile (`~/.bashrc` / `~/.zshrc`) to avoid retyping:
+
+```bash
+export CELS_USERNAME=<your-cels-username>
+export ARGO_USER=<your-alcf-username>     # only if it differs from CELS_USERNAME
+```
+
+If all three names are the same (common), you can skip this entirely.
+
 ### Run it
 
 **Terminal 1 — start the shim:**
 
 ```bash
-uvx argo-shim         # no install needed
-# or: pip install argo-shim && argo-shim
+uvx argo-shim
+# or, if installed: argo-shim
+# with a custom username: ARGO_USER=<alcf-name> CELS_USERNAME=<cels-name> uvx argo-shim
 ```
 
 On startup it finds/creates the SSH tunnel to `apps.inside.anl.gov:443`, starts a local proxy
 on a port derived from your username, writes the correct `ANTHROPIC_BASE_URL` + auth token into
-`~/.claude/settings.json`, and runs health checks. If your **ALCF username differs from your
-CELS username**, set `CELS_USERNAME` to the CELS one.
+`~/.claude/settings.json`, and runs health checks.
 
 **Terminal 2 — start Claude Code** (same node):
 

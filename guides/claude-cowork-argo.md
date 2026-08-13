@@ -96,7 +96,7 @@ fix that before touching Claude Desktop.
 2. Choose **Gateway** as the provider.
 3. Set:
    - **Base URL:** `https://apps.inside.anl.gov/argoapi` (**no trailing slash**)
-   - **API key:** your **ANL domain username** (e.g. `jchilders`) — *inferred:* Argo treats
+   - **API key:** your **ANL domain username** (e.g. `alice`) — *inferred:* Argo treats
      the bearer token as the username, exactly as Claude Code does, so this is what goes in
      the key field.
    - **Auth scheme:** `bearer`

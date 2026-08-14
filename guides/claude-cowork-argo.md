@@ -65,6 +65,16 @@ that has outbound HTTPS to both hosts, and point the gateway base URL straight a
 - Your **ANL domain username** (this is your Argo credential).
 - The machine must reach **both** `apps.inside.anl.gov` and `downloads.claude.ai` (see above).
 
+> **Installing on a managed/locked-down machine?** The Claude Desktop installer may prompt for
+> an **admin username and password**. On many Argonne-managed laptops and desktops, standard
+> users don't have admin rights, and the install will stop here. Before giving up, **try your
+> own ANL login and password** — some managed machines grant their assigned user admin (or
+> temporary "make me an admin") rights, so it may just work. If it doesn't, you'll need to ask
+> your **local IT/desktop support** to install it (or to grant you install rights); don't enter
+> any credentials you weren't given. If you can't get Claude Desktop installed, the terminal
+> path — **[Claude Code + Argo](claude-code-argo.md)** — needs no admin install and is a good
+> fallback.
+
 ---
 
 ## Step 1 — Confirm Argo speaks the Gateway protocol

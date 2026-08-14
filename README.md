@@ -55,10 +55,16 @@ Full endpoint/auth/model details for both: **[guides/reference.md](guides/refere
 1. **Install the tool** you want:
    - Claude Code: <https://docs.anthropic.com/en/docs/claude-code/overview>
    - Claude Desktop (for Cowork): <https://claude.com/download>
+     - ⚠️ **Managed/locked-down machine?** The Claude Desktop installer may ask for an **admin
+       username and password**. If you don't have admin rights the install stops here — first
+       **try your own ANL login** (some managed machines grant it), and if that fails ask your
+       **local IT** to install it. Claude Code (terminal) needs no admin install, so it's a
+       good fallback. Details in the Cowork guides.
 2. **Get your credential:**
    - Argo → get access **approved** by your DOO / AI Rep
      (<https://my.anl.gov/ai-at-argonne>), then use your **ANL domain username**.
-   - Ask Sage → an **Ask Sage account** and a **user API key**.
+   - Ask Sage → an **API key** from Argonne's ANL Ask Sage instance
+     (<https://chat.asksage.anl.gov/>, ANL SSO → Settings → API Keys).
 3. **Read [guides/reference.md](guides/reference.md)** once for the endpoints, auth rules, and
    model names — every guide links back to it.
 
@@ -81,8 +87,8 @@ Full endpoint/auth/model details for both: **[guides/reference.md](guides/refere
 
 For off-network / on-node access to **Argo**, the guides use
 [**argo-shim**](https://github.com/n-getty/argo-shim) (`pip install argo-shim`), a maintained
-SSH-tunnel proxy — we no longer ship our own proxy scripts. **Ask Sage** is a public HTTPS
-endpoint and needs no proxy at all.
+SSH-tunnel proxy — we no longer ship our own proxy scripts. **Ask Sage** (ANL instance,
+`api.asksage.anl.gov`) is a plain HTTPS endpoint and needs no proxy at all.
 
 ---
 

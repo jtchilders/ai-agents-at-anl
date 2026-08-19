@@ -1,61 +1,71 @@
 # Claude Cowork + Ask Sage
 
 **Goal:** run Anthropic's **Claude Desktop** app (the **Cowork** and **Code** tabs) against
-**Ask Sage** as the inference provider, instead of Anthropic's first-party API. You get the
-full agentic Cowork experience — file creation, multi-step research, sub-agent coordination,
-the Code tab — with inference and billing handled by Ask Sage.
+**Ask Sage** (Argonne's ANL-hosted instance) as the inference provider. You get the full
+agentic Cowork experience — file creation, multi-step research, sub-agent coordination, the
+Code tab — with inference handled by Ask Sage.
 
-This uses Cowork's **"3P" (third-party) mode** with the **Gateway** provider. Ask Sage
-implements exactly the Anthropic-compatible API that the Gateway provider expects
-(`POST /v1/messages` + `GET /v1/models`), so you point Cowork directly at Ask Sage — no
-LiteLLM/Portkey proxy in between.
-
-> **Reference:** Anthropic's canonical 3P docs are at
-> <https://claude.com/docs/cowork/3p/overview> and
-> <https://claude.com/docs/cowork/3p/configuration>. This guide is the Ask Sage-specific
-> version.
+> **Source:** The primary setup below follows Argonne's official *"Vibe Coding with Argo"*
+> instructions for Claude Desktop (last updated 2026-08-17), which add Ask Sage as a second
+> gateway alongside Argo. An optional
+> [advanced appendix](#appendix-advanced--3p-config-file--mdm-fleet-deployment) covers
+> config-file / MDM fleet deployment for locked-down rollouts.
 
 ---
 
 ## Prerequisites
 
-- **Claude Desktop** installed (macOS or Windows), on a build that supports **Cowork on 3P**:
-  <https://claude.com/download>
+- **Claude Desktop** installed for your OS: <https://claude.com/download>
 - An **Ask Sage API key** from Argonne's ANL-hosted instance. Get it at
   **<https://chat.asksage.anl.gov/>**: log in with **ANL SSO** → click your **user profile
   (bottom left)** to open **Settings** → **API Keys** tab → **generate** a key and **copy** it.
   Treat it like a password. (These docs use `api.asksage.anl.gov`; match the base URL to the
   instance you get your key from.)
 
-> **Installing on a managed/locked-down machine?** The Claude Desktop installer may prompt for
-> an **admin username and password**. On many Argonne-managed laptops and desktops, standard
-> users don't have admin rights, and the install will stop here. Before giving up, **try your
-> own ANL login and password** — some managed machines grant their assigned user admin (or
-> temporary "make me an admin") rights, so it may just work. If it doesn't, you'll need to ask
-> your **local IT/desktop support** to install it (or to grant you install rights); don't enter
-> any credentials you weren't given. If you can't get Claude Desktop installed, the terminal
-> path — **[Claude Code + Ask Sage](claude-code-asksage.md)** — needs no admin install and is a
-> good fallback.
+> ⚠️ **Installing Claude Desktop requires local admin rights.** Per Argonne's official
+> instructions, **local admin privileges must be granted during installation** — you're
+> accepting the risk of giving Claude deeper access to your computer, so admin permission is
+> necessary. On a managed machine, **first try your own ANL login and password** at the
+> installer's admin prompt (some managed machines grant the assigned user admin rights). If
+> that doesn't work, ask your **local IT/desktop support** to install it; don't enter
+> credentials you weren't given. If you can't get admin rights at all, the terminal path —
+> **[Claude Code + Ask Sage](claude-code-asksage.md)** — installs without a system-level admin
+> prompt and is a good fallback.
 
 ---
 
-## The fast path (macOS, in-app config window)
+## Step 1 — Install Claude Desktop
 
-The quickest working setup uses Claude Desktop's built-in configuration window — no
-hand-editing of plist files.
+Download and install Claude Desktop from <https://claude.com/download>, granting local admin
+during installation (see the note above). Install only from the official source.
 
-1. **Enable Developer Mode:** in Claude Desktop, go to **Help → Troubleshooting → Enable
-   Developer Mode**. A **Developer** menu appears in the menu bar.
-2. Open **Developer → Configure third-party inference**.
-3. Choose **Gateway** as the inference provider.
-4. Set the fields:
-   - **Base URL:** `https://api.asksage.anl.gov/server/anthropic` (**no trailing slash**)
-   - **API key:** your Ask Sage user API key
-   - **Auth scheme:** `bearer`
-5. (Recommended) Apply the [telemetry-disable settings](#locking-down-telemetry-to-anthropic)
-   before saving.
-6. Click **Apply Locally**, then **fully quit and reopen** Claude Desktop (config is read
-   once at launch).
+---
+
+## Step 2 — Open the Inference Configuration
+
+In Claude Desktop, open the **Inference Configuration** from the **lower-left menu**, and select
+the option to **connect to your own gateway**.
+
+If you're setting up Ask Sage **alongside an existing Argo gateway** (see the
+[Cowork + Argo guide](claude-cowork-argo.md)), instead click the **"Default" dropdown** in the
+**top-right corner** of the Inference Configuration window, choose **New configuration**, and
+enter **"Ask Sage"** into the name field. This keeps both gateways available so you can switch
+between them.
+
+---
+
+## Step 3 — Configure the Ask Sage gateway
+
+Fill in the gateway settings for Ask Sage:
+
+| Field | Value |
+|---|---|
+| **base URL** | `https://api.asksage.anl.gov/server/anthropic/` |
+| **API key** | your Ask Sage key (copy from **Ask Sage → Settings → API Keys**) |
+| **auth scheme** | select **`bearer`** from the option list |
+
+Click **Apply changes** at the bottom of the window. Claude will restart and your Ask Sage
+access will be enabled.
 
 The model picker auto-discovers available models from
 `https://api.asksage.anl.gov/server/anthropic/v1/models` — you do **not** have to list models
@@ -63,7 +73,32 @@ manually.
 
 ---
 
-## The config-file path (macOS)
+## Step 4 — Switch between Argo and Ask Sage (if you have both)
+
+If you configured both gateways, you can **manually switch between the Argo and Ask Sage
+gateways** from the **dropdown in the top-right** of the Inference Configuration window at any
+time. Be sure to click the **Apply changes** button when you switch — Claude will automatically
+restart the app to activate the selected gateway.
+
+---
+
+## Step 5 — Pick a model and start
+
+After the app restarts, select a Claude model in the picker. Start Vibe Working with Claude
+Cowork + Ask Sage!
+
+---
+
+## Appendix (advanced) — 3P config-file / MDM fleet deployment
+
+> ⚠️ **Most users should use the in-app Inference Configuration above.** This appendix documents
+> the lower-level **third-party ("3P") deployment mode** — editing
+> `claude_desktop_config.json` directly or pushing it via MDM. It's useful for **fleet
+> rollouts, locked-down/air-gapped profiles, and the Windows MSIX sandbox path**. The field
+> names and mechanics here are derived from Anthropic's general 3P documentation rather than
+> Argonne's Claude Desktop instructions — **verify against your environment.**
+
+### The config-file path (macOS)
 
 For MDM fleets or if you prefer editing a file, the per-user config lives at:
 
@@ -97,12 +132,9 @@ change.
 > including booleans (`"true"`/`"false"`) and arrays (JSON-encoded into a single string). The
 > most common mistake is writing `inferenceModels` or `coworkEgressAllowedHosts` as a native
 > array — that won't work. In a `.mobileconfig` it must be `<string>[...]</string>` with the
-> JSON inside. The in-app config window (Developer → Configure third-party inference) can
-> export the correctly-encoded format for you.
+> JSON inside. The in-app config window can export the correctly-encoded format for you.
 
----
-
-## Enabling Opus 4.8 with the 1M-token context window
+### Enabling Opus 4.8 with the 1M-token context window
 
 Models auto-discover, so you only need `inferenceModels` when you want to **curate** the
 picker, **set a default** (first entry wins), or **surface a 1M-context variant**.
@@ -129,9 +161,7 @@ Add `supports1m: true` to the models that support it. On Ask Sage today that's *
 (In MDM/plist form this whole array becomes a single JSON-in-a-string value, per the encoding
 rule above.)
 
----
-
-## Locking down telemetry to Anthropic
+### Locking down telemetry to Anthropic
 
 By default Cowork sends some operational telemetry to Anthropic-operated hosts. For regulated
 or air-gapped Argonne deployments you'll typically disable all of it, so the **only** outbound
@@ -148,7 +178,7 @@ traffic is to Ask Sage. Set all four to `true`:
 > into failures, so support becomes a manual "collect and send logs" model. Consider leaving
 > it `false` during initial rollout, then enabling it once stable.
 
-### Recommended locked-down profile (Ask Sage)
+#### Recommended locked-down profile (Ask Sage)
 
 ```json
 {
@@ -171,7 +201,7 @@ traffic is to Ask Sage. Set all four to `true`:
 }
 ```
 
-### Required firewall egress (allowlist on HTTPS 443)
+#### Required firewall egress (allowlist on HTTPS 443)
 
 Even fully locked down, Cowork needs these three:
 
@@ -183,7 +213,7 @@ Even fully locked down, Cowork needs these three:
 
 Everything else can be denied.
 
-### Optional: send your own telemetry to your collector
+#### Optional: send your own telemetry to your collector
 
 Independent of Anthropic-bound telemetry, you can export full session activity (prompts, tool
 calls, token counts, errors) to your own OpenTelemetry collector for an audit trail:
@@ -194,15 +224,13 @@ calls, token counts, errors) to your own OpenTelemetry collector for an audit tr
 "otlpHeaders":   "x-api-key=...,x-org=argonne"
 ```
 
----
-
-## Windows (MSIX) — end-to-end setup
+### Windows (MSIX) — end-to-end setup
 
 Claude Desktop on Windows ships as an **MSIX package**, which sandboxes all filesystem writes.
 Anthropic's public docs point at `%APPDATA%\Claude-3p\` — **that path does not work on MSIX
 builds.** Use the real sandboxed path below. All commands use Command Prompt (`cmd.exe`).
 
-### Step 1 — Install and find your publisher ID
+#### Step 1 — Install and find your publisher ID
 
 Download the `.msix` from <https://claude.com/download> and double-click to install. Then:
 
@@ -213,7 +241,7 @@ dir "C:\Program Files\WindowsApps" | findstr /i claude
 Example output: `Claude_1.3883.0.0_x64__pzs8sxrjxfjjc`. The last segment (`pzs8sxrjxfjjc`) is
 your **publisher ID** — substitute yours everywhere you see `pzs8sxrjxfjjc` below.
 
-### Step 2 — Initialize the sandboxed folders (first launch)
+#### Step 2 — Initialize the sandboxed folders (first launch)
 
 ```cmd
 start shell:AppsFolder\Claude_pzs8sxrjxfjjc!Claude
@@ -224,7 +252,7 @@ taskkill /F /IM claude.exe /T
 MSIX apps leave child processes running — closing the window isn't enough. Multiple "SUCCESS"
 lines from `taskkill` is normal.
 
-### Step 3 — Generate a deployment UUID
+#### Step 3 — Generate a deployment UUID
 
 ```cmd
 REM Git for Windows:
@@ -237,7 +265,7 @@ powershell -Command "[guid]::NewGuid().ToString()"
 > install worldwide under a shared placeholder, and Anthropic can't identify your org on
 > support tickets.
 
-### Step 4 — Create the config file at the MSIX path
+#### Step 4 — Create the config file at the MSIX path
 
 ```cmd
 mkdir "%LOCALAPPDATA%\Packages\Claude_pzs8sxrjxfjjc\LocalCache\Roaming\Claude-3p"
@@ -274,7 +302,7 @@ Paste this, replacing the two placeholders:
 >    `.txt` and creates `claude_desktop_config.json.txt`, which the app ignores.
 > 2. Encoding must be **UTF-8** (default on Win 11), **not** "UTF-8 with BOM."
 
-### Step 5 — Validate the file
+#### Step 5 — Validate the file
 
 ```cmd
 dir "%LOCALAPPDATA%\Packages\Claude_pzs8sxrjxfjjc\LocalCache\Roaming\Claude-3p\"
@@ -283,7 +311,7 @@ ren "...\claude_desktop_config.json.txt" claude_desktop_config.json
 type "...\claude_desktop_config.json"
 ```
 
-### Step 6 — Launch fresh and verify
+#### Step 6 — Launch fresh and verify
 
 ```cmd
 taskkill /F /IM claude.exe /T
@@ -301,19 +329,19 @@ sign-in screen. The 3P log is at:
 healthy session logs lines like `[Lifecycle] Session ...: initializing → running` and
 `model: 'claude-...'`.
 
-### Step 7 — Test inference
+#### Step 7 — Test inference
 
 Type "hi" and send — you should get a response within a few seconds. If it hangs, test the
 endpoint directly:
 
 ```cmd
 curl -N -X POST "https://api.asksage.anl.gov/server/anthropic/v1/messages" ^
-  -H "Authorization: Bearer YOUR_ASKSAGE_TOKEN" ^
+  -H "Authorization: Bearer YOUR_A...OKEN" ^
   -H "Content-Type: application/json" ^
   -d "{\"model\":\"claude-sonnet-4-5\",\"max_tokens\":64,\"stream\":true,\"messages\":[{\"role\":\"user\",\"content\":\"hi\"}]}"
 ```
 
-### Windows bad-signs cheat sheet
+#### Windows bad-signs cheat sheet
 
 | Log shows | Means | Fix |
 |---|---|---|
@@ -322,9 +350,7 @@ curl -N -X POST "https://api.asksage.anl.gov/server/anthropic/v1/messages" ^
 | `claude.ai/login` / "User logged out" | Config not read — standard mode | Verify config is at the sandboxed path, JSON valid, all processes killed before launch |
 | `Not main instance, returning early` | Zombie processes intercepted launch | `taskkill /F /IM claude.exe /T` then relaunch |
 
----
-
-## Verifying no traffic leaks to Anthropic
+### Verifying no traffic leaks to Anthropic
 
 With the locked-down profile applied, check your firewall logs / a packet capture for
 connections to `*.sentry.io`, `browser-intake-us5-datadoghq.com`, `a-cdn.anthropic.com`,
@@ -333,5 +359,5 @@ Anthropic-domain traffic should be the one-time `downloads.claude.ai` fetch at s
 
 ---
 
-**Next:** the [Cowork + Argo guide](claude-cowork-argo.md) applies this same 3P Gateway
-mechanism but points it at Argonne's Argo instead of Ask Sage.
+**Next:** the [Cowork + Argo guide](claude-cowork-argo.md) configures the Argo gateway (and
+lets you keep both Argo and Ask Sage in the same app).

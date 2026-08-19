@@ -36,17 +36,16 @@ Full endpoint/auth/model details for both: **[guides/reference.md](guides/refere
 | | **Argo** (ANL username, on-network) | **Ask Sage** (API key, anywhere) |
 |---|---|---|
 | **Claude Code** (terminal) | [→ Code + Argo](guides/claude-code-argo.md) | [→ Code + Ask Sage](guides/claude-code-asksage.md) |
-| **Claude Cowork** (desktop app) | [→ Cowork + Argo](guides/claude-cowork-argo.md) ⚠️ | [→ Cowork + Ask Sage](guides/claude-cowork-asksage.md) |
+| **Claude Cowork** (desktop app) | [→ Cowork + Argo](guides/claude-cowork-argo.md) | [→ Cowork + Ask Sage](guides/claude-cowork-asksage.md) |
 
 **Not sure which?**
 
 - On an ANL machine / login node and want a terminal agent → **Code + Argo**.
 - Have an Ask Sage key and want zero networking setup → **Code + Ask Sage** or
   **Cowork + Ask Sage**.
-- Want the desktop GUI and have an Ask Sage key → **Cowork + Ask Sage** (best-documented
-  desktop path).
-- Want the desktop GUI on Argo → **Cowork + Argo** (⚠️ combines documented mechanisms but is
-  not an officially vendor-documented pairing — read the caveats in that guide).
+- Want the desktop GUI and have an Ask Sage key → **Cowork + Ask Sage**.
+- Want the desktop GUI on Argo → **Cowork + Argo** (on VPN / on-site). You can configure both
+  Argo and Ask Sage as gateways in the same app and switch between them.
 
 ---
 
@@ -55,11 +54,11 @@ Full endpoint/auth/model details for both: **[guides/reference.md](guides/refere
 1. **Install the tool** you want:
    - Claude Code: <https://docs.anthropic.com/en/docs/claude-code/overview>
    - Claude Desktop (for Cowork): <https://claude.com/download>
-     - ⚠️ **Managed/locked-down machine?** The Claude Desktop installer may ask for an **admin
-       username and password**. If you don't have admin rights the install stops here — first
-       **try your own ANL login** (some managed machines grant it), and if that fails ask your
-       **local IT** to install it. Claude Code (terminal) needs no admin install, so it's a
-       good fallback. Details in the Cowork guides.
+     - ⚠️ **Installing Claude Desktop requires local admin rights** (it needs deeper system
+       access). On a managed/locked-down machine, first **try your own ANL login** at the
+       installer's admin prompt (some managed machines grant it); if that fails, ask your
+       **local IT** to install it. No admin at all? Claude Code (terminal) installs without a
+       system admin prompt and is a good fallback. Details in the Cowork guides.
 2. **Get your credential:**
    - Argo → get access **approved** by your DOO / AI Rep
      (<https://my.anl.gov/ai-at-argonne>), then use your **ANL domain username**.
@@ -80,7 +79,7 @@ Full endpoint/auth/model details for both: **[guides/reference.md](guides/refere
 │   ├── claude-code-argo.md          # Claude Code  ->  Argo   (on-network + argo-shim off-network)
 │   ├── claude-code-asksage.md       # Claude Code  ->  Ask Sage
 │   ├── claude-cowork-asksage.md     # Claude Cowork -> Ask Sage (macOS + Windows MSIX)
-│   └── claude-cowork-argo.md        # Claude Cowork -> Argo    (3P Gateway pointed at Argo)
+│   └── claude-cowork-argo.md        # Claude Cowork -> Argo    (in-app gateway; +Ask Sage as 2nd gateway)
 └── scripts/
     └── asksage-claude.sh            # optional one-command Claude Code launcher (Ask Sage)
 ```
@@ -94,10 +93,12 @@ SSH-tunnel proxy — we no longer ship our own proxy scripts. **Ask Sage** (ANL 
 
 ## A note on accuracy
 
-Three of the four combinations follow paths documented by Anthropic and/or Argonne. The
-**Cowork + Argo** combination composes two documented mechanisms (Cowork's backend-agnostic 3P
-Gateway provider + Argo's Anthropic-compatible endpoints) into a pairing that neither vendor
-documents explicitly. That guide flags which steps are documented fact vs. reasoned inference,
-and points to the proven Code + Argo path as a fallback. **Verify any configuration in your own
-network environment before relying on it** — firewall egress (especially to
-`downloads.claude.ai` for Cowork) is the most common thing that blocks a setup.
+All four combinations now follow paths documented by Anthropic and/or Argonne. The **Cowork**
+guides' primary setup follows Argonne's official *"Vibe Coding with Argo"* Claude Desktop
+instructions (in-app Inference Configuration; `x-api-key` for Argo, `bearer` for Ask Sage).
+Each Cowork guide also carries an **advanced appendix** covering the lower-level 3P
+config-file / MDM fleet deployment — those field names are derived from Anthropic's general 3P
+docs rather than Argonne's instructions and are flagged as such. **Verify any configuration in
+your own network environment before relying on it** — for on-VPN Cowork, reaching Argo /
+Ask Sage is what matters; for locked-down 3P/MDM profiles, egress to `downloads.claude.ai` is
+the most common thing that blocks a setup.
